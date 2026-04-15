@@ -1,5 +1,6 @@
 Brain Tumor Detection System Using Deep Learning
 An automated diagnostic framework designed to bridge the gap between complex deep learning architectures and clinical usability. This system leverages Transfer Learning to classify brain MRI scans into four pathological categories with a peak accuracy of 95.13%.
+
 📌 OverviewManual interpretation of MRI slices by radiologists is a meticulous and time-intensive process prone to human fatigue. This project proposes a Computer-Aided Diagnosis (CAD) system that performs high-fidelity feature extraction to identify subtle pathological patterns often difficult to discern by the naked eye.
 
 Key Features
