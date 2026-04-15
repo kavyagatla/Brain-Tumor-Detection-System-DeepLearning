@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Analytics Summary</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Total Scans</h6>
+                    <h2 class="display-4">{{ total_scans }}</h2>
+                    <hr>
+
+                    <h6 class="text-muted mb-3">Tumor Distribution (%)</h6>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="tumorDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-trophy-fill"></i> Best Detection Model</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary fw-bold">{{ best_model }}</h5>
+                    <p class="card-text display-6">{{ best_acc }}%</p>
+                    <small class="text-muted">Accuracy on Test Set</small>
+                </div>
+            </div>
+
+            <a href="{{ url_for('main.upload') }}" class="btn btn-success w-100 py-3 shadow-sm">
+                <strong>+ New MRI Scan</strong>
+            </a>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Upload History</h5>
+                    <span class="badge bg-secondary">Viewing last 10 scans</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>Date & Time (IST)</th>
+                                    <th>Diagnosis</th>
+                                    <th>Confidence</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for scan in scans %}
+                                <tr>
+                                    <td><strong>{{ scan.patient_id }}</strong></td>
+
+                                    <td>
+                                        {% set ist_time = scan.upload_date + timedelta(hours=5, minutes=30) %}
+                                        {{ ist_time.strftime('%d-%m-%Y %I:%M %p') }}
+                                    </td>
+
+                                    <td>
+                                        <span class="badge {% if scan.tumor_type == 'No Tumor' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ scan.tumor_type }}
+                                        </span>
+                                    </td>
+                                    <td>{{ scan.confidence }}%</td>
+                                    <td>
+                                        <a href="{{ url_for('main.result', scan_id=scan.id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="View Report">View Report</a>
+
+                                        <button type="button" class="btn btn-sm btn-outline-danger shadow-sm ms-1" data-bs-toggle="modal" data-bs-target="#deleteModal{{ scan.id }}" title="Delete Scan">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">No scans found. Start by uploading an MRI.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for scan in scans %}
+<div class="modal fade" id="deleteModal{{ scan.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ scan.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('main.delete_scan', scan_id=scan.id) }}" method="POST">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel{{ scan.id }}">Confirm Deletion</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start">
+                    <p>Are you sure you want to permanently delete Patient ID <strong>{{ scan.patient_id }}</strong>'s scan?</p>
+                    <p class="text-danger small mb-2"><i class="bi bi-exclamation-triangle-fill"></i> This action cannot be undone.</p>
+
+                    <div class="mb-3 mt-4">
+                        <label for="password" class="form-label fw-bold">Enter your password to confirm:</label>
+                        <input type="password" class="form-control" name="password" required placeholder="Doctor Password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('tumorDistributionChart').getContext('2d');
+
+        const chartLabels = {{ labels | tojson }};
+        const chartData = {{ chart_data | tojson }};
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    data: chartData,
+                    backgroundColor: [
+                        '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6610f2'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: { boxWidth: 12, padding: 15, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}
