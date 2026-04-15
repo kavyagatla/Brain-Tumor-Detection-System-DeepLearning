@@ -1,0 +1,10 @@
+Flask==3.0.0
+Flask-SQLAlchemy
+Flask-Login
+Werkzeug
+tensorflow
+numpy
+pillow
+opencv-python-headless  #<-- For image preprocessing
+fpdf                   # <-- For generating PDF reports
+python-dotenv
