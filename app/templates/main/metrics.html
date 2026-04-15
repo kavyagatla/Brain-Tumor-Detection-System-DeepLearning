@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-bar-chart-fill"></i> Model Performance Metrics</h2>
+    </div>
+
+    {% if not metrics %}
+    <div class="alert alert-warning shadow-sm">
+        Metrics data not found. Please run the evaluation script or check if your JSON file is in the static folder.
+    </div>
+    {% else %}
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Overall Accuracy Comparison</h5>
+        </div>
+        <div class="card-body">
+            <div style="height: 350px;">
+                <canvas id="accuracyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Detailed Performance Scores (Test Dataset)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0 text-center align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>AI Model</th>
+                            <th>Accuracy</th>
+                            <th>Precision</th>
+                            <th>Recall</th>
+                            <th>F1-Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for model_name in ['vgg16', 'resnet50', 'densenet121'] %}
+                        {% if model_name in metrics %}
+                        <tr>
+                            <td class="fw-bold text-uppercase">{{ model_name }}</td>
+                            <td><span class="badge bg-success fs-6">{{ metrics[model_name]['accuracy'] }}%</span></td>
+                            <td>{{ metrics[model_name]['precision'] }}%</td>
+                            <td>{{ metrics[model_name]['recall'] }}%</td>
+                            <td>{{ metrics[model_name]['f1_score'] }}%</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+{% if metrics %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('accuracyChart').getContext('2d');
+
+        const labels = ['VGG16', 'ResNet50', 'DenseNet121'];
+
+        // Safely fetch data passed from Flask, default to 0 if missing
+        const data = [
+            {{ metrics.get('vgg16', {}).get('accuracy', 0) }},
+            {{ metrics.get('resnet50', {}).get('accuracy', 0) }},
+            {{ metrics.get('densenet121', {}).get('accuracy', 0) }}
+        ];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Accuracy Score (%)',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)', // Blue
+                        'rgba(75, 192, 192, 0.7)', // Teal
+                        'rgba(153, 102, 255, 0.7)' // Purple
+
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 193, 7, 1)'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 50, // Starts graph at 50% to show differences better
+                        max: 100,
+                        title: { display: true, text: 'Percentage (%)' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false } // Hide legend since labels are on X axis
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+
+{% endblock %}

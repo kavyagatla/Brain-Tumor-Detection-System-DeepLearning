@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mt-5">
+    <h1> Brain Tumor Detection System </h1>
+    <p class="lead">Advanced diagnostics for medical professionals.</p>
+    {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-lg btn-success">Register as Doctor</a>
+    {% else %}
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-lg btn-primary">Go to Dashboard</a>
+    {% endif %}
+</div>
+{% endblock %}
