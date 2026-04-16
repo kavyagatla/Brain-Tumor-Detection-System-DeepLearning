@@ -51,5 +51,17 @@ Pituitary: 901 images
 
 No Tumor: 500 images
 
+Output Screenshots:
+<img width="1435" height="764" alt="image" src="https://github.com/user-attachments/assets/f9f511da-7443-4a88-a2df-9d23a2d46cb0" />
+<img width="1357" height="722" alt="image" src="https://github.com/user-attachments/assets/b15d278d-8c08-4bdf-b722-0649c932c060" />
+<img width="1300" height="691" alt="image" src="https://github.com/user-attachments/assets/df0eb582-6c13-47e9-85f4-fc5bcc2af3ec" />
+<img width="1678" height="693" alt="image" src="https://github.com/user-attachments/assets/f2e89bbd-0ac5-4060-8357-26c4f1fd45a4" />
+<img width="1266" height="674" alt="image" src="https://github.com/user-attachments/assets/5df724ff-be28-4a4d-a62a-3614a448bbc0" />
+
+
+
+
+
+
 🔮 Future Enhancements
 Achieving 100% diagnostic accuracy through hyperparameter optimization.Integrating Explainable AI (XAI) using Grad-CAM to highlight tumor regions.Transitioning to a cloud-based architecture for Telemedicine support.Implementing 3D segmentation for precise tumor volume estimation.
